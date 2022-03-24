@@ -37,7 +37,7 @@ class World
         void PrintWorld();
         olc::vf2d FindSpawnableCell();
         olc::vi2d GetSize();
-        void DrawMap(olc::TileTransformedView* tv);
+        void DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords);
         olc::vf2d FindRandomOpenSpot();
         void AddSolidTile(olc::vi2d index, TileType tTileType);
         void RemoveSolidTile(olc::vi2d index);

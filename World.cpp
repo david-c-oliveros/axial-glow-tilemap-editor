@@ -34,9 +34,17 @@ void World::StaticGenMap()
         "#..............................................................................................................................#"
         "#..............................................................................................................................#"
         "#..............................................................................................................................#"
+        "################################################################################################################################"
+        "################################################################################################################################"
+        "################################################################################################################################"
+        "################################################################################################################################"
+        "################################################################################################################################"
+        "################################################################################################################################"
+        "################################################################################################################################"
+        "################################################################################################################################"
         "################################################################################################################################";
 
-    vSize = { 128, 16 };
+    vSize = { 128, 24 };
 }
 
 
@@ -75,35 +83,44 @@ olc::vi2d World::GetSize()
 }
 
 
-void World::DrawMap(olc::TileTransformedView* tv)
+void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords)
 {
+    olc::vi2d vCursorTile = vCursorCoords;
     olc::vi2d vTL = tv->GetTopLeftTile().max({ 0, 0 });
     olc::vi2d vBR = tv->GetBottomRightTile().min(vSize);
     olc::vi2d vTile;
+    olc::Pixel cOutlineColor = olc::BLACK;
+    int iTransparency = 255;
+    //tv->DrawRect(vCursorTile, { 1.0f, 1.0f }, olc::Pixel(255, 255, 255, 200));
     for (vTile.y = vTL.y; vTile.y < vBR.y; vTile.y++)
     {
         for (vTile.x = vTL.x; vTile.x < vBR.x; vTile.x++)
         {
+            if (vTile.x == vCursorTile.x && vTile.y == vCursorTile.y)
+                iTransparency = 200;
+            else
+                iTransparency = 255;
             switch(sMap[vTile.y * vSize.x + vTile.x])
             {
                 case('#'):
-                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::WHITE);
-                    tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::Pixel(255, 255, 255, iTransparency));
+                    tv->DrawRect(vTile, { 1.0f, 1.0f }, cOutlineColor);
                     break;
 
                 case('+'):
-                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::RED);
-                    tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::Pixel(255, 0, 0, iTransparency));
+                    tv->DrawRect(vTile, { 1.0f, 1.0f }, cOutlineColor);
                     break;
 
                 case('='):
-                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::BLUE);
-                    tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::Pixel(0, 0, 255, iTransparency));
+                    tv->DrawRect(vTile, { 1.0f, 1.0f }, cOutlineColor);
                     break;
                 //tv->DrawPartialDecal(vTile, m_pMapSprite->Decal(), { 0.0f, 0.0f }, { 16.0f, 16.0f }, { 2.1f, 2.1f });
             }
         }
     }
+    tv->DrawRect(vCursorTile, { 1.0f, 1.0f }, olc::DARK_GREY);
 }
 
 

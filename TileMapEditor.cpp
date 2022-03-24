@@ -18,6 +18,7 @@ class TileMapEditor : public olc::PixelGameEngine
     private:
         TileType iCurColorIndex;
         std::vector<color_t> vColors;
+        olc::vf2d vCursorCoords;
 
         olc::TileTransformedView tv;
         World cWorld = World();
@@ -73,7 +74,7 @@ class TileMapEditor : public olc::PixelGameEngine
             std::string sSelectedTileType = vColors[iCurColorIndex].sName;
             olc::vf2d vStrPos = { 10.0f, 85.0f };
             DrawStringDecal(vStrPos, vColors[iCurColorIndex].sName, vColors[iCurColorIndex].pColor);
-            cWorld.DrawMap(&tv);
+            cWorld.DrawMap(&tv, vCursorCoords);
             cSaveButton.DrawSelf(this);
             for (int i = 0; i < vTileTypes.size(); i++)
             {
@@ -90,10 +91,12 @@ class TileMapEditor : public olc::PixelGameEngine
             if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
             if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
 
+            olc::vf2d vCursorScreenCoords = GetMousePos();
+            vCursorCoords = tv.ScreenToWorld(vCursorScreenCoords);
             bOnUI = false;
             for (int i = 0; i < vTileTypes.size(); i++)
             {
-                if (vTileTypes[i].ButtonHover(GetMousePos()))
+                if (vTileTypes[i].ButtonHover(vCursorScreenCoords))
                 {
                     bOnUI = true;
                     if (GetMouse(0).bPressed)
@@ -105,7 +108,7 @@ class TileMapEditor : public olc::PixelGameEngine
                 }
             }
 
-            if (cSaveButton.ButtonHover(GetMousePos()))
+            if (cSaveButton.ButtonHover(vCursorScreenCoords))
             {
                 bOnUI = true;
                 if (GetMouse(0).bPressed)
@@ -121,12 +124,12 @@ class TileMapEditor : public olc::PixelGameEngine
             {
                 if (GetMouse(0).bHeld)
                 {
-                    cWorld.AddSolidTile(tv.ScreenToWorld(GetMousePos()), iCurColorIndex);
+                    cWorld.AddSolidTile(vCursorCoords, iCurColorIndex);
                 }
 
                 if (GetMouse(1).bHeld)
                 {
-                    cWorld.RemoveSolidTile(tv.ScreenToWorld(GetMousePos()));
+                    cWorld.RemoveSolidTile(tv.ScreenToWorld(vCursorScreenCoords));
                 }
             }
         }
