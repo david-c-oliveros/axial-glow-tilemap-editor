@@ -16,19 +16,37 @@ class TileMapEditor : public olc::PixelGameEngine
         }
 
     private:
+        TileType iCurColorIndex;
+        std::vector<color_t> vColors;
+
         olc::TileTransformedView tv;
         World cWorld = World();
         int iGameTick;
         Button cSaveButton = Button();
+        std::vector<Button> vTileTypes;
+        bool bOnUI = false;
 
     public:
         bool OnUserCreate() override
         {
+            iCurColorIndex = WHITE;
+            vColors = {
+                { olc::WHITE, "White" },
+                { olc::RED,   "Red"   },
+                { olc::BLUE,  "Blue"  }
+            };
             tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 32, 32 });
             cWorld.GenerateWorld();
             iGameTick = 0;
             olc::vf2d p = { (ScreenWidth() / 2) - 32, ScreenHeight() - 64 };
-            cSaveButton = Button(p, { 80, 16 }, "Save Map");
+
+            cSaveButton = Button(p, olc::vf2d(80.0f, 16.0f), "Save Map");
+            p = olc::vf2d(10.0f, 15.0f);
+            vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 1"));
+            p.y += 20.0f;
+            vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 2"));
+            p.y += 20.0f;
+            vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 3"));
 
             return true;
         }
@@ -39,6 +57,10 @@ class TileMapEditor : public olc::PixelGameEngine
             HandleInput();
             Render();
             cSaveButton.Update();
+            for (int i = 0; i < vTileTypes.size(); i++)
+            {
+                vTileTypes[i].Update();
+            }
             iGameTick++;
 
             return true;
@@ -48,8 +70,15 @@ class TileMapEditor : public olc::PixelGameEngine
         void Render()
         {
             Clear(olc::VERY_DARK_BLUE);
+            std::string sSelectedTileType = vColors[iCurColorIndex].sName;
+            olc::vf2d vStrPos = { 10.0f, 85.0f };
+            DrawStringDecal(vStrPos, vColors[iCurColorIndex].sName, vColors[iCurColorIndex].pColor);
             cWorld.DrawMap(&tv);
             cSaveButton.DrawSelf(this);
+            for (int i = 0; i < vTileTypes.size(); i++)
+            {
+                vTileTypes[i].DrawSelf(this);
+            }
         }
 
 
@@ -61,8 +90,24 @@ class TileMapEditor : public olc::PixelGameEngine
             if (GetMouseWheel() > 0) tv.ZoomAtScreenPos(2.0f, GetMousePos());
             if (GetMouseWheel() < 0) tv.ZoomAtScreenPos(0.5f, GetMousePos());
 
+            bOnUI = false;
+            for (int i = 0; i < vTileTypes.size(); i++)
+            {
+                if (vTileTypes[i].ButtonHover(GetMousePos()))
+                {
+                    bOnUI = true;
+                    if (GetMouse(0).bPressed)
+                    {
+                        vTileTypes[i].Pressed();
+                        iCurColorIndex = TileType(i);
+                        std::cout << "Selected tile " << i + 1 << std::endl;
+                    }
+                }
+            }
+
             if (cSaveButton.ButtonHover(GetMousePos()))
             {
+                bOnUI = true;
                 if (GetMouse(0).bPressed)
                 {
                     // Save to file
@@ -71,11 +116,12 @@ class TileMapEditor : public olc::PixelGameEngine
                     cWorld.SaveMapToFile();
                 }
             }
-            else
+
+            if (!bOnUI)
             {
                 if (GetMouse(0).bHeld)
                 {
-                    cWorld.AddSolidTile(tv.ScreenToWorld(GetMousePos()));
+                    cWorld.AddSolidTile(tv.ScreenToWorld(GetMousePos()), iCurColorIndex);
                 }
 
                 if (GetMouse(1).bHeld)

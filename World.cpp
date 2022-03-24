@@ -84,10 +84,22 @@ void World::DrawMap(olc::TileTransformedView* tv)
     {
         for (vTile.x = vTL.x; vTile.x < vBR.x; vTile.x++)
         {
-            if (sMap[vTile.y * vSize.x + vTile.x] == '#')
+            switch(sMap[vTile.y * vSize.x + vTile.x])
             {
-                tv->FillRect(vTile, { 1.0f, 1.0f }, olc::WHITE);
-                tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                case('#'):
+                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::WHITE);
+                    tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                    break;
+
+                case('+'):
+                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::RED);
+                    tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                    break;
+
+                case('='):
+                    tv->FillRect(vTile, { 1.0f, 1.0f }, olc::BLUE);
+                    tv->DrawRect(vTile, { 1.0f, 1.0f }, olc::BLACK);
+                    break;
                 //tv->DrawPartialDecal(vTile, m_pMapSprite->Decal(), { 0.0f, 0.0f }, { 16.0f, 16.0f }, { 2.1f, 2.1f });
             }
         }
@@ -101,7 +113,7 @@ olc::vf2d World::FindRandomOpenSpot()
     srand(ti);
     olc::vf2d randCoord = { (int)rand() % vSize.x, (int)rand() % vSize.y };
     int index = randCoord.y * vSize.x + randCoord.x;
-    while (index < sMap.length() && sMap[index] == '#')
+    while (index < sMap.length() && sMap[index] != '.')
     {
         randCoord = { rand() % vSize.x, rand() % vSize.y };
         index = randCoord.y * vSize.x + randCoord.x;
@@ -111,18 +123,31 @@ olc::vf2d World::FindRandomOpenSpot()
 }
 
 
-void World::AddSolidTile(olc::vi2d index)
+void World::AddSolidTile(olc::vi2d index, TileType tTileType)
 {
+    char cTile;
+    switch(tTileType)
+    {
+        case(0):
+            cTile = '#';
+            break;
+        case(1):
+            cTile = '+';
+            break;
+        case(2):
+            cTile = '=';
+            break;
+    }
     int i = index.y * vSize.x + index.x;
     if (i < sMap.length() && sMap[i] == '.')
-        sMap[i] = '#';
+        sMap[i] = cTile;
 }
 
 
 void World::RemoveSolidTile(olc::vi2d index)
 {
     int i = index.y * vSize.x + index.x;
-    if (i < sMap.length() && sMap[i] == '#')
+    if (i < sMap.length() && sMap[i] != '.')
         sMap[i] = '.';
 }
 

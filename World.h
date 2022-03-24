@@ -4,6 +4,22 @@
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
 
+
+enum TileType
+{
+    WHITE,
+    RED,
+    BLUE
+};
+
+
+struct color_t
+{
+    olc::Pixel pColor;
+    std::string sName;
+};
+
+
 class World
 {
     public:
@@ -23,7 +39,7 @@ class World
         olc::vi2d GetSize();
         void DrawMap(olc::TileTransformedView* tv);
         olc::vf2d FindRandomOpenSpot();
-        void AddSolidTile(olc::vi2d index);
+        void AddSolidTile(olc::vi2d index, TileType tTileType);
         void RemoveSolidTile(olc::vi2d index);
         void SaveMapToFile();
 };
