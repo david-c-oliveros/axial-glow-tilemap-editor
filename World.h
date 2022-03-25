@@ -42,4 +42,5 @@ class World
         void AddSolidTile(olc::vi2d index, TileType tTileType);
         void RemoveSolidTile(olc::vi2d index);
         void SaveMapToFile();
+        void ResetMap();
 };

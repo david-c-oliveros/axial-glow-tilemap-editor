@@ -24,6 +24,7 @@ class TileMapEditor : public olc::PixelGameEngine
         World cWorld = World();
         int iGameTick;
         Button cSaveButton = Button();
+        Button cResetButton = Button();
         std::vector<Button> vTileTypes;
         bool bOnUI = false;
 
@@ -39,15 +40,18 @@ class TileMapEditor : public olc::PixelGameEngine
             tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 32, 32 });
             cWorld.GenerateWorld();
             iGameTick = 0;
-            olc::vf2d p = { (ScreenWidth() / 2) - 32, ScreenHeight() - 64 };
+            olc::vf2d p = { (ScreenWidth() / 2) - 84, ScreenHeight() - 64 };
 
             cSaveButton = Button(p, olc::vf2d(80.0f, 16.0f), "Save Map");
+            p.x += 88.0f;
+            cResetButton = Button(p, olc::vf2d(80.0f, 16.0f), "Reset Map");
             p = olc::vf2d(10.0f, 15.0f);
             vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 1"));
             p.y += 20.0f;
             vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 2"));
             p.y += 20.0f;
             vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 3"));
+            p.y += 40.0f;
 
             return true;
         }
@@ -58,6 +62,7 @@ class TileMapEditor : public olc::PixelGameEngine
             HandleInput();
             Render();
             cSaveButton.Update();
+            cResetButton.Update();
             for (int i = 0; i < vTileTypes.size(); i++)
             {
                 vTileTypes[i].Update();
@@ -76,6 +81,7 @@ class TileMapEditor : public olc::PixelGameEngine
             DrawStringDecal(vStrPos, vColors[iCurColorIndex].sName, vColors[iCurColorIndex].pColor);
             cWorld.DrawMap(&tv, vCursorCoords);
             cSaveButton.DrawSelf(this);
+            cResetButton.DrawSelf(this);
             for (int i = 0; i < vTileTypes.size(); i++)
             {
                 vTileTypes[i].DrawSelf(this);
@@ -117,6 +123,17 @@ class TileMapEditor : public olc::PixelGameEngine
                     std::cout << "Saving map to file" << std::endl;
                     cSaveButton.Pressed();
                     cWorld.SaveMapToFile();
+                }
+            }
+
+            if (cResetButton.ButtonHover(vCursorScreenCoords))
+            {
+                bOnUI = true;
+                if (GetMouse(0).bPressed)
+                {
+                    std::cout << "Reseting map" << std::endl;
+                    cResetButton.Pressed();
+                    cWorld.ResetMap();
                 }
             }
 
