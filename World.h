@@ -29,7 +29,8 @@ class World
     public:
         std::unique_ptr<olc::Renderable> m_pMapSprite;
         std::string sGreeting;
-        std::string sMap;
+        std::string sMapString;
+        std::vector<std::vector<char>> vMap;
         olc::vi2d vSize;
         void GenerateWorld();
         void StaticGenMap();
