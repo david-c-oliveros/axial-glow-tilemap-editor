@@ -20,11 +20,16 @@ class TileMapEditor : public olc::PixelGameEngine
         std::vector<color_t> vColors;
         olc::vf2d vCursorCoords;
 
+        int iCursorSize = 1;
+        const int iMaxCursorSize = 8;
+
         olc::TileTransformedView tv;
         World cWorld = World();
         int iGameTick;
         Button cSaveButton = Button();
         Button cResetButton = Button();
+        Button cIncreaseSizeButton = Button();
+        Button cDecreaseSizeButton = Button();
         std::vector<Button> vTileTypes;
         bool bOnUI = false;
 
@@ -40,6 +45,8 @@ class TileMapEditor : public olc::PixelGameEngine
             tv = olc::TileTransformedView({ ScreenWidth(), ScreenHeight() }, { 32, 32 });
             cWorld.GenerateWorld();
             iGameTick = 0;
+            cIncreaseSizeButton = Button( olc::vf2d(ScreenWidth() - 64.0f, 128.0f), olc::vf2d(16.0, 16.0f), "+" );
+            cDecreaseSizeButton = Button( olc::vf2d(ScreenWidth() - 32.0f, 128.0f), olc::vf2d(16.0, 16.0f), "-" );
             olc::vf2d p = { (ScreenWidth() / 2) - 84, ScreenHeight() - 64 };
 
             cSaveButton = Button(p, olc::vf2d(80.0f, 16.0f), "Save Map");
@@ -63,6 +70,8 @@ class TileMapEditor : public olc::PixelGameEngine
             Render();
             cSaveButton.Update();
             cResetButton.Update();
+            cIncreaseSizeButton.Update();
+            cDecreaseSizeButton.Update();
             for (int i = 0; i < vTileTypes.size(); i++)
             {
                 vTileTypes[i].Update();
@@ -79,6 +88,8 @@ class TileMapEditor : public olc::PixelGameEngine
             std::string sSelectedTileType = vColors[iCurColorIndex].sName;
             olc::vf2d vStrPos = { 10.0f, 85.0f };
             DrawStringDecal(vStrPos, vColors[iCurColorIndex].sName, vColors[iCurColorIndex].pColor);
+            cIncreaseSizeButton.DrawSelf(this);
+            cDecreaseSizeButton.DrawSelf(this);
             cWorld.DrawMap(&tv, vCursorCoords);
             cSaveButton.DrawSelf(this);
             cResetButton.DrawSelf(this);
@@ -135,6 +146,22 @@ class TileMapEditor : public olc::PixelGameEngine
                     cResetButton.Pressed();
                     cWorld.ResetMap();
                 }
+            }
+
+            if (cIncreaseSizeButton.ButtonHover(vCursorScreenCoords))
+            {
+                bOnUI = true;
+                if (iCursorSize <= iMaxCursorSize)
+                    iCursorSize++;
+                cIncreaseSizeButton.Pressed();
+            }
+
+            if (cDecreaseSizeButton.ButtonHover(vCursorScreenCoords))
+            {
+                bOnUI = true;
+                if (iCursorSize > 1)
+                    iCursorSize--;
+                cDecreaseSizeButton.Pressed();
             }
 
             if (!bOnUI)

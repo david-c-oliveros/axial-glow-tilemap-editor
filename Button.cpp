@@ -7,7 +7,7 @@ Button::Button()
 
 Button::Button(olc::vf2d vPos, olc::vf2d vSize, std::string sText)
     : Object(vPos), m_sText(sText), m_vBaseSize(vSize), m_vSize(vSize),
-      m_cEventCounter(Counter(10))
+      m_cEventCounter(Counter(10)), m_Color(olc::BLUE)
 {
     m_vPressedSize = { m_vBaseSize.x - 2.0f, m_vBaseSize.y - 2.0f };
 }
