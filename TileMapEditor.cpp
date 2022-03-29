@@ -90,7 +90,7 @@ class TileMapEditor : public olc::PixelGameEngine
             DrawStringDecal(vStrPos, vColors[iCurColorIndex].sName, vColors[iCurColorIndex].pColor);
             cIncreaseSizeButton.DrawSelf(this);
             cDecreaseSizeButton.DrawSelf(this);
-            cWorld.DrawMap(&tv, vCursorCoords);
+            cWorld.DrawMap(&tv, vCursorCoords, iCursorSize);
             cSaveButton.DrawSelf(this);
             cResetButton.DrawSelf(this);
             for (int i = 0; i < vTileTypes.size(); i++)
@@ -151,29 +151,35 @@ class TileMapEditor : public olc::PixelGameEngine
             if (cIncreaseSizeButton.ButtonHover(vCursorScreenCoords))
             {
                 bOnUI = true;
-                if (iCursorSize <= iMaxCursorSize)
-                    iCursorSize++;
-                cIncreaseSizeButton.Pressed();
+                if (GetMouse(0).bPressed)
+                {
+                    if (iCursorSize <= iMaxCursorSize)
+                        iCursorSize++;
+                    cIncreaseSizeButton.Pressed();
+                }
             }
 
             if (cDecreaseSizeButton.ButtonHover(vCursorScreenCoords))
             {
                 bOnUI = true;
-                if (iCursorSize > 1)
-                    iCursorSize--;
-                cDecreaseSizeButton.Pressed();
+                if (GetMouse(0).bPressed)
+                {
+                    if (iCursorSize > 1)
+                        iCursorSize--;
+                    cDecreaseSizeButton.Pressed();
+                }
             }
 
             if (!bOnUI)
             {
                 if (GetMouse(0).bHeld)
                 {
-                    cWorld.AddSolidTile(vCursorCoords, iCurColorIndex);
+                    cWorld.AddSolidTile(vCursorCoords, iCurColorIndex, iCursorSize);
                 }
 
                 if (GetMouse(1).bHeld)
                 {
-                    cWorld.RemoveSolidTile(tv.ScreenToWorld(vCursorScreenCoords));
+                    cWorld.RemoveSolidTile(tv.ScreenToWorld(vCursorScreenCoords), iCursorSize);
                 }
             }
         }

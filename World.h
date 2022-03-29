@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <algorithm>
 #include "olcPixelGameEngine.h"
 #include "olcPGEX_TransformedView.h"
 
@@ -38,10 +39,10 @@ class World
         void PrintWorld();
         olc::vf2d FindSpawnableCell();
         olc::vi2d GetSize();
-        void DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords);
+        void DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords, int iCursorSize);
         olc::vf2d FindRandomOpenSpot();
-        void AddSolidTile(olc::vi2d index, TileType tTileType);
-        void RemoveSolidTile(olc::vi2d index);
+        void AddSolidTile(olc::vi2d index, TileType tTileType, int iCursorSize);
+        void RemoveSolidTile(olc::vi2d index, int iCursorSize);
         void SaveMapToFile();
         void ResetMap();
 };

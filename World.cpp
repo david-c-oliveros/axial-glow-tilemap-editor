@@ -94,15 +94,14 @@ olc::vi2d World::GetSize()
 }
 
 
-void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords)
+void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords, int iCursorSize)
 {
-    olc::vi2d vCursorTile = vCursorCoords;
+    olc::vi2d vCursorTile = { vCursorCoords.x - (iCursorSize / 2), vCursorCoords.y - (iCursorSize / 2) };
     olc::vi2d vTL = tv->GetTopLeftTile().max({ 0, 0 });
     olc::vi2d vBR = tv->GetBottomRightTile().min(vSize);
     olc::vi2d vTile;
     olc::Pixel cOutlineColor = olc::BLACK;
     int iTransparency = 255;
-    //tv->DrawRect(vCursorTile, { 1.0f, 1.0f }, olc::Pixel(255, 255, 255, 200));
     for (vTile.y = vTL.y; vTile.y < vBR.y; vTile.y++)
     {
         for (vTile.x = vTL.x; vTile.x < vBR.x; vTile.x++)
@@ -112,7 +111,6 @@ void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords)
             else
                 iTransparency = 255;
             switch(vMap[vTile.y][vTile.x])
-            //switch(sMapString[vTile.y * vSize.x + vTile.x])
             {
                 case('#'):
                     tv->FillRect(vTile, { 1.0f, 1.0f }, olc::Pixel(255, 255, 255, iTransparency));
@@ -132,7 +130,7 @@ void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords)
             }
         }
     }
-    tv->DrawRect(vCursorTile, { 1.0f, 1.0f }, olc::DARK_GREY);
+    tv->DrawRect(vCursorTile, { iCursorSize, iCursorSize }, olc::DARK_GREY);
 }
 
 
@@ -152,7 +150,7 @@ olc::vf2d World::FindRandomOpenSpot()
 }
 
 
-void World::AddSolidTile(olc::vi2d index, TileType tTileType)
+void World::AddSolidTile(olc::vi2d index, TileType tTileType, int iCursorSize)
 {
     char cTile;
     switch(tTileType)
@@ -198,11 +196,20 @@ void World::AddSolidTile(olc::vi2d index, TileType tTileType)
 }
 
 
-void World::RemoveSolidTile(olc::vi2d index)
+void World::RemoveSolidTile(olc::vi2d index, int iCursorSize)
 {
+    //int iOffset = iCursorSize == 1 ? 1 : iCursorSize / 2;
+    int iOffset = iCursorSize / 2;
     int i = index.y * vSize.x + index.x;
-    if (index.y >= 0 && index.y < vSize.y && index.x < vSize.x && vMap[index.y][index.x] != '.')
-        vMap[index.y][index.x] = '.';
+    for (int y = std::clamp(index.y - iOffset, 0, vSize.y); y < std::clamp(index.y + iOffset, 0, vSize.y); y++)
+    {
+        for (int x = std::clamp(index.x - iOffset, 0, vSize.x); x < std::clamp(index.x + iOffset, 0, vSize.x); x++)
+        {
+            std::cout << "(" << x << "," << y << ")" << std::endl;
+            if (y >= 0 && y < vSize.y && x < vSize.x && vMap[y][x] != '.')
+                vMap[y][x] = '.';
+        }
+    }
 }
 
 
