@@ -153,8 +153,13 @@ class TileMapEditor : public olc::PixelGameEngine
                 bOnUI = true;
                 if (GetMouse(0).bPressed)
                 {
-                    if (iCursorSize <= iMaxCursorSize)
-                        iCursorSize++;
+                    if (iCursorSize == 1)
+                        iCursorSize = 2;
+                    else
+                        iCursorSize += 2;
+
+                    if (iCursorSize > iMaxCursorSize)
+                        iCursorSize = iMaxCursorSize;
                     cIncreaseSizeButton.Pressed();
                 }
             }
@@ -164,8 +169,9 @@ class TileMapEditor : public olc::PixelGameEngine
                 bOnUI = true;
                 if (GetMouse(0).bPressed)
                 {
-                    if (iCursorSize > 1)
-                        iCursorSize--;
+                    iCursorSize -= 2;
+                    if (iCursorSize < 2)
+                        iCursorSize = 1;
                     cDecreaseSizeButton.Pressed();
                 }
             }

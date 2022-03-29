@@ -97,6 +97,7 @@ olc::vi2d World::GetSize()
 void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords, int iCursorSize)
 {
     olc::vi2d vCursorTile = { vCursorCoords.x - (iCursorSize / 2), vCursorCoords.y - (iCursorSize / 2) };
+    int iOffset = iCursorSize / 2;
     olc::vi2d vTL = tv->GetTopLeftTile().max({ 0, 0 });
     olc::vi2d vBR = tv->GetBottomRightTile().min(vSize);
     olc::vi2d vTile;
@@ -106,10 +107,12 @@ void World::DrawMap(olc::TileTransformedView* tv, olc::vf2d vCursorCoords, int i
     {
         for (vTile.x = vTL.x; vTile.x < vBR.x; vTile.x++)
         {
-            if (vTile.x == vCursorTile.x && vTile.y == vCursorTile.y)
+            if ((vTile.x >= vCursorTile.x && vTile.x <= (vCursorTile.x + iCursorSize - 1)) &&
+                (vTile.y >= vCursorTile.y && vTile.y <= (vCursorTile.y + iCursorSize - 1)))
                 iTransparency = 200;
             else
                 iTransparency = 255;
+
             switch(vMap[vTile.y][vTile.x])
             {
                 case('#'):
@@ -165,6 +168,7 @@ void World::AddSolidTile(olc::vi2d index, TileType tTileType, int iCursorSize)
             cTile = '=';
             break;
     }
+
     if (index.x >= vSize.x)
     {
         int iDeltaSize = index.x - vSize.x;
@@ -188,24 +192,44 @@ void World::AddSolidTile(olc::vi2d index, TileType tTileType, int iCursorSize)
             vMap[vMap.size() - 1].push_back('#');
         }
     }
-    else
+    else if (iCursorSize == 1)
     {
         if (index.y >= 0 && index.y < vSize.y && vMap[index.y][index.x] == '.')
             vMap[index.y][index.x] = cTile;
+    }
+    else
+    {
+        /*****************************/
+        /*        Cursor Size        */
+        /*****************************/
+        int iOffset = iCursorSize / 2;
+        int i = index.y * vSize.x + index.x;
+        for (int y = std::clamp(index.y - iOffset, 0, vSize.y); y < std::clamp(index.y + iOffset, 0, vSize.y); y++)
+        {
+            for (int x = std::clamp(index.x - iOffset, 0, vSize.x); x < std::clamp(index.x + iOffset, 0, vSize.x); x++)
+            {
+                if (y >= 0 && y < vSize.y && x < vSize.x && vMap[y][x] == '.')
+                    vMap[y][x] = cTile;
+            }
+        }
+        /*****************************/
     }
 }
 
 
 void World::RemoveSolidTile(olc::vi2d index, int iCursorSize)
 {
-    //int iOffset = iCursorSize == 1 ? 1 : iCursorSize / 2;
+    if (iCursorSize == 1)
+    {
+        if (index.y >= 0 && index.y < vSize.y && index.x < vSize.x && vMap[index.y][index.x] != '.')
+            vMap[index.y][index.x] = '.';
+    }
     int iOffset = iCursorSize / 2;
     int i = index.y * vSize.x + index.x;
     for (int y = std::clamp(index.y - iOffset, 0, vSize.y); y < std::clamp(index.y + iOffset, 0, vSize.y); y++)
     {
         for (int x = std::clamp(index.x - iOffset, 0, vSize.x); x < std::clamp(index.x + iOffset, 0, vSize.x); x++)
         {
-            std::cout << "(" << x << "," << y << ")" << std::endl;
             if (y >= 0 && y < vSize.y && x < vSize.x && vMap[y][x] != '.')
                 vMap[y][x] = '.';
         }
