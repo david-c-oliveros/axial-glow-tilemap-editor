@@ -257,7 +257,7 @@ void World::SaveMapToFile()
     {
         for (int j = 0; j < vSize.x; j++)
         {
-            fout << sMapString[i * vSize.x + j];
+            fout << vMap[i][j];
         }
         fout << std::endl;
     }

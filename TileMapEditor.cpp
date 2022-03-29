@@ -7,6 +7,13 @@
 #include "MathUtils.h"
 
 
+enum AppState
+{
+    MENU,
+    EDIT
+};
+
+
 class TileMapEditor : public olc::PixelGameEngine
 {
     public:
@@ -16,9 +23,19 @@ class TileMapEditor : public olc::PixelGameEngine
         }
 
     private:
+        AppState iCurAppState;
         TileType iCurColorIndex;
         std::vector<color_t> vColors;
         olc::vf2d vCursorCoords;
+
+        /***********************************/
+        /*              Menu               */
+        /***********************************/
+        Button cOpenButton = Button();
+
+        /***********************************/
+        /*              Edit               */
+        /***********************************/
 
         int iCursorSize = 1;
         const int iMaxCursorSize = 8;
@@ -36,6 +53,16 @@ class TileMapEditor : public olc::PixelGameEngine
     public:
         bool OnUserCreate() override
         {
+            /***********************************/
+            /*              Menu               */
+            /***********************************/
+            cOpenButton = Button(olc::vf2d((ScreenWidth() / 2) - 20.0f, (ScreenHeight() / 2) - 8.0f),
+                                 olc::vf2d(80.0f, 16.0f), "Open Map");
+
+            /***********************************/
+            /*              Edit               */
+            /***********************************/
+            iCurAppState = EDIT;
             iCurColorIndex = WHITE;
             vColors = {
                 { olc::WHITE, "White" },
@@ -66,15 +93,38 @@ class TileMapEditor : public olc::PixelGameEngine
 
         bool OnUserUpdate(float fElapsedTime) override
         {
-            HandleInput();
-            Render();
-            cSaveButton.Update();
-            cResetButton.Update();
-            cIncreaseSizeButton.Update();
-            cDecreaseSizeButton.Update();
-            for (int i = 0; i < vTileTypes.size(); i++)
+            if (iCurAppState == EDIT)
             {
-                vTileTypes[i].Update();
+                if (GetKey(olc::Key::TAB).bReleased) iCurAppState = MENU;
+            }
+            else if (iCurAppState == MENU)
+            {
+                if (GetKey(olc::Key::TAB).bReleased) iCurAppState = EDIT;
+            }
+
+            switch(iCurAppState)
+            {
+                case(EDIT):
+                    HandleEditInput();
+                    RenderEdit();
+                    cSaveButton.Update();
+                    cResetButton.Update();
+                    cIncreaseSizeButton.Update();
+                    cDecreaseSizeButton.Update();
+                    for (int i = 0; i < vTileTypes.size(); i++)
+                    {
+                        vTileTypes[i].Update();
+                    }
+                    break;
+
+                case(MENU):
+                    HandleMenuInput();
+                    RenderMenu();
+                    cOpenButton.Update();
+                    break;
+
+                default:
+                    break;
             }
             iGameTick++;
 
@@ -82,7 +132,7 @@ class TileMapEditor : public olc::PixelGameEngine
         }
 
 
-        void Render()
+        void RenderEdit()
         {
             Clear(olc::VERY_DARK_BLUE);
             std::string sSelectedTileType = vColors[iCurColorIndex].sName;
@@ -100,7 +150,28 @@ class TileMapEditor : public olc::PixelGameEngine
         }
 
 
-        void HandleInput()
+        void RenderMenu()
+        {
+            Clear(olc::VERY_DARK_BLUE);
+            cOpenButton.DrawSelf(this);
+        }
+
+
+        void HandleMenuInput()
+        {
+            olc::vf2d vCursorScreenCoords = GetMousePos();
+            if (cOpenButton.ButtonHover(vCursorScreenCoords))
+            {
+                bOnUI = true;
+                if (GetMouse(0).bPressed)
+                {
+                    cOpenButton.Pressed();
+                }
+            }
+        }
+
+
+        void HandleEditInput()
         {
             if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
             if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());

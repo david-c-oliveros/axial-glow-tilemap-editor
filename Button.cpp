@@ -33,7 +33,7 @@ void Button::DrawSelf(olc::PixelGameEngine* pge)
 {
     olc::vf2d s = { m_vSize.x + 1.0f, m_vSize.y + 1.0f };
     olc::vf2d p = { m_vPos.x - 1.0f, m_vPos.y - 1.0f };
-    pge->DrawRect(p, s, olc::DARK_GREY);
+    pge->FillRectDecal(p, s, olc::DARK_GREY);
     pge->FillRectDecal(m_vPos, m_vSize, m_Color);
     olc::vf2d tmp_pos = { m_vPos.x + 8, m_vPos.y + 5 };
     pge->DrawStringDecal(tmp_pos, m_sText, olc::BLACK);
