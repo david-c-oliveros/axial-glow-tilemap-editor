@@ -166,6 +166,7 @@ class TileMapEditor : public olc::PixelGameEngine
                 if (GetMouse(0).bPressed)
                 {
                     cOpenButton.Pressed();
+                    cWorld.LoadMapFromFile();
                 }
             }
         }

@@ -265,6 +265,37 @@ void World::SaveMapToFile()
 }
 
 
+void World::LoadMapFromFile()
+{
+    std::ifstream fin;
+    std::string filename = "maps/world_map_33.txt";
+    if (std::filesystem::exists(filename))
+    {
+        fin.open(filename);
+    }
+    std::string line;
+    vMap.clear();
+    int y = 0;
+    int x = 0;
+    while (fin >> line)
+    {
+        std::stringstream ss;
+        ss << line;
+        vMap.push_back(std::vector<char>());
+        char c;
+        x = 0;
+        while (ss.get(c))
+        {
+            vMap[y].push_back(c);
+            x++;
+        }
+        y++;
+    }
+    vSize = {x, y};
+    std::cout << vSize << std::endl;
+}
+
+
 void World::ResetMap()
 {
     vSize = { 128, 24 };
