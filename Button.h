@@ -10,11 +10,11 @@ class Button : public Object
         olc::vf2d m_vBaseSize;
         olc::vf2d m_vPressedSize;
         olc::vf2d m_vSize;
-        std::string m_sText;
         olc::Pixel m_Color;
         Counter m_cEventCounter;
 
     public:
+        std::string sText;
         Button();
         Button(olc::vf2d vPos, olc::vf2d vSize, std::string sText);
         ~Button();

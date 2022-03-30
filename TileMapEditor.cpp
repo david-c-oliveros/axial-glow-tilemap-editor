@@ -10,7 +10,8 @@
 enum AppState
 {
     MENU,
-    EDIT
+    EDIT,
+    FILE_SELECT
 };
 
 
@@ -31,22 +32,26 @@ class TileMapEditor : public olc::PixelGameEngine
         /***********************************/
         /*              Menu               */
         /***********************************/
-        Button cOpenButton = Button();
+        Button cOpenButton;
+
+        /*******************************************/
+        /*                File Input               */
+        /*******************************************/
+        std::vector<Button> vFileButtons;
 
         /***********************************/
         /*              Edit               */
         /***********************************/
-
         int iCursorSize = 1;
         const int iMaxCursorSize = 8;
 
         olc::TileTransformedView tv;
         World cWorld = World();
         int iGameTick;
-        Button cSaveButton = Button();
-        Button cResetButton = Button();
-        Button cIncreaseSizeButton = Button();
-        Button cDecreaseSizeButton = Button();
+        Button cSaveButton;
+        Button cResetButton;
+        Button cIncreaseSizeButton;
+        Button cDecreaseSizeButton;
         std::vector<Button> vTileTypes;
         bool bOnUI = false;
 
@@ -123,12 +128,38 @@ class TileMapEditor : public olc::PixelGameEngine
                     cOpenButton.Update();
                     break;
 
+                case(FILE_SELECT):
+                    HandleFileSelectInput();
+                    RenderFileSelect();
+                    for (int i = 0; i < vFileButtons.size(); i++)
+                    {
+                        vFileButtons[i].Update();
+                    }
+                    break;
+
                 default:
                     break;
             }
             iGameTick++;
 
             return true;
+        }
+
+
+        void RenderMenu()
+        {
+            Clear(olc::VERY_DARK_BLUE);
+            cOpenButton.DrawSelf(this);
+        }
+
+
+        void RenderFileSelect()
+        {
+            Clear(olc::VERY_DARK_BLUE);
+            for (int i = 0; i < vFileButtons.size(); i++)
+            {
+                vFileButtons[i].DrawSelf(this);
+            }
         }
 
 
@@ -150,13 +181,6 @@ class TileMapEditor : public olc::PixelGameEngine
         }
 
 
-        void RenderMenu()
-        {
-            Clear(olc::VERY_DARK_BLUE);
-            cOpenButton.DrawSelf(this);
-        }
-
-
         void HandleMenuInput()
         {
             olc::vf2d vCursorScreenCoords = GetMousePos();
@@ -166,7 +190,28 @@ class TileMapEditor : public olc::PixelGameEngine
                 if (GetMouse(0).bPressed)
                 {
                     cOpenButton.Pressed();
-                    cWorld.LoadMapFromFile();
+                    vFileButtons.push_back(Button(olc::vf2d((ScreenWidth() / 2) - 20.0f, (ScreenHeight() / 2) - 8.0f),
+                                 olc::vf2d(80.0f, 16.0f), "maps/world_map_33.txt"));
+                    iCurAppState = FILE_SELECT;
+                }
+            }
+        }
+
+
+        void HandleFileSelectInput()
+        {
+            olc::vf2d vCursorScreenCoords = GetMousePos();
+            for (int i = 0; i < vFileButtons.size(); i++)
+            {
+                if (vFileButtons[i].ButtonHover(vCursorScreenCoords))
+                {
+                    bOnUI = true;
+                    if (GetMouse(0).bPressed)
+                    {
+                        vFileButtons[i].Pressed();
+                        cWorld.LoadMapFromFile(vFileButtons[i].sText);
+                        iCurAppState = EDIT;
+                    }
                 }
             }
         }

@@ -265,10 +265,9 @@ void World::SaveMapToFile()
 }
 
 
-void World::LoadMapFromFile()
+void World::LoadMapFromFile(std::string filename)
 {
     std::ifstream fin;
-    std::string filename = "maps/world_map_33.txt";
     if (std::filesystem::exists(filename))
     {
         fin.open(filename);

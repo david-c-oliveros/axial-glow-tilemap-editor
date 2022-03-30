@@ -6,7 +6,7 @@ Button::Button()
 
 
 Button::Button(olc::vf2d vPos, olc::vf2d vSize, std::string sText)
-    : Object(vPos), m_sText(sText), m_vBaseSize(vSize), m_vSize(vSize),
+    : Object(vPos), sText(sText), m_vBaseSize(vSize), m_vSize(vSize),
       m_cEventCounter(Counter(10)), m_Color(olc::BLUE)
 {
     m_vPressedSize = { m_vBaseSize.x - 2.0f, m_vBaseSize.y - 2.0f };
@@ -36,7 +36,7 @@ void Button::DrawSelf(olc::PixelGameEngine* pge)
     pge->FillRectDecal(p, s, olc::DARK_GREY);
     pge->FillRectDecal(m_vPos, m_vSize, m_Color);
     olc::vf2d tmp_pos = { m_vPos.x + 8, m_vPos.y + 5 };
-    pge->DrawStringDecal(tmp_pos, m_sText, olc::BLACK);
+    pge->DrawStringDecal(tmp_pos, sText, olc::BLACK);
 }
 
 
