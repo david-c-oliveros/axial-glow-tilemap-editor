@@ -65,6 +65,25 @@ class TileMapEditor : public olc::PixelGameEngine
                                  olc::vf2d(80.0f, 16.0f), "Open Map");
 
             /***********************************/
+            /*              Menu               */
+            /***********************************/
+            const std::filesystem::path maps{"maps"};
+            int i = 0;
+            float fPosOffset = 200.0f;
+            for (auto const& dir_entry : std::filesystem::directory_iterator{maps})
+            {
+                std::stringstream ss;
+                ss << dir_entry;
+                std::string str = ss.str();
+                str.erase(std::remove(str.begin(), str.end(), '"'), str.end());
+                vFileButtons.push_back(Button(olc::vf2d((ScreenWidth() / 2) - 80.0f, (ScreenHeight() / 2) - fPosOffset),
+                                              olc::vf2d(160.0f, 16.0f), str));
+                fPosOffset -= 20.0f;
+                i++;
+            }
+            std::cout << i << std::endl;
+
+            /***********************************/
             /*              Edit               */
             /***********************************/
             iCurAppState = EDIT;
@@ -85,12 +104,11 @@ class TileMapEditor : public olc::PixelGameEngine
             p.x += 88.0f;
             cResetButton = Button(p, olc::vf2d(80.0f, 16.0f), "Reset Map");
             p = olc::vf2d(10.0f, 15.0f);
-            vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 1"));
-            p.y += 20.0f;
-            vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 2"));
-            p.y += 20.0f;
-            vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 3"));
-            p.y += 40.0f;
+            for (int i = 0; i < 3; i++)
+            {
+                vTileTypes.push_back(Button(p, olc::vf2d(80.0f, 16.0f), "Type 1"));
+                p.y += 20.0f;
+            }
 
             return true;
         }
@@ -190,8 +208,6 @@ class TileMapEditor : public olc::PixelGameEngine
                 if (GetMouse(0).bPressed)
                 {
                     cOpenButton.Pressed();
-                    vFileButtons.push_back(Button(olc::vf2d((ScreenWidth() / 2) - 20.0f, (ScreenHeight() / 2) - 8.0f),
-                                 olc::vf2d(80.0f, 16.0f), "maps/world_map_33.txt"));
                     iCurAppState = FILE_SELECT;
                 }
             }
@@ -210,6 +226,7 @@ class TileMapEditor : public olc::PixelGameEngine
                     {
                         vFileButtons[i].Pressed();
                         cWorld.LoadMapFromFile(vFileButtons[i].sText);
+                        std::cout << vFileButtons[i].sText << std::endl;
                         iCurAppState = EDIT;
                     }
                 }
@@ -219,6 +236,7 @@ class TileMapEditor : public olc::PixelGameEngine
 
         void HandleEditInput()
         {
+            bOnUI = false;
             if (GetMouse(2).bPressed) tv.StartPan(GetMousePos());
             if (GetMouse(2).bHeld) tv.UpdatePan(GetMousePos());
             if (GetMouse(2).bReleased) tv.EndPan(GetMousePos());
@@ -227,7 +245,6 @@ class TileMapEditor : public olc::PixelGameEngine
 
             olc::vf2d vCursorScreenCoords = GetMousePos();
             vCursorCoords = tv.ScreenToWorld(vCursorScreenCoords);
-            bOnUI = false;
             for (int i = 0; i < vTileTypes.size(); i++)
             {
                 if (vTileTypes[i].ButtonHover(vCursorScreenCoords))
@@ -237,7 +254,6 @@ class TileMapEditor : public olc::PixelGameEngine
                     {
                         vTileTypes[i].Pressed();
                         iCurColorIndex = TileType(i);
-                        std::cout << "Selected tile " << i + 1 << std::endl;
                     }
                 }
             }
@@ -247,7 +263,6 @@ class TileMapEditor : public olc::PixelGameEngine
                 bOnUI = true;
                 if (GetMouse(0).bPressed)
                 {
-                    // Save to file
                     std::cout << "Saving map to file" << std::endl;
                     cSaveButton.Pressed();
                     cWorld.SaveMapToFile();
