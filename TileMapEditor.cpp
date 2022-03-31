@@ -11,7 +11,8 @@ enum AppState
 {
     MENU,
     EDIT,
-    FILE_SELECT
+    FILE_SELECT,
+    SAVE_AS
 };
 
 
@@ -45,10 +46,17 @@ class TileMapEditor : public olc::PixelGameEngine
         int iCursorSize = 1;
         const int iMaxCursorSize = 8;
 
+        /****************************************/
+        /*                Save As               */
+        /****************************************/
+        std::string sCustomFilename;
+        Button cSaveCustomButton;
+
         olc::TileTransformedView tv;
         World cWorld = World();
         int iGameTick;
         Button cSaveButton;
+        Button cSaveAsButton;
         Button cResetButton;
         Button cIncreaseSizeButton;
         Button cDecreaseSizeButton;
@@ -64,9 +72,16 @@ class TileMapEditor : public olc::PixelGameEngine
             cOpenButton = Button(olc::vf2d((ScreenWidth() / 2) - 20.0f, (ScreenHeight() / 2) - 8.0f),
                                  olc::vf2d(80.0f, 16.0f), "Open Map");
 
-            /***********************************/
-            /*              Menu               */
-            /***********************************/
+            /****************************************/
+            /*                Save As               */
+            /****************************************/
+            sCustomFilename = "";
+            cSaveCustomButton = Button(olc::vf2d((ScreenWidth() / 2) - 20.0f, (ScreenHeight() / 2) - 8.0f),
+                                       olc::vf2d(80.0f, 16.0f), "Save");
+
+            /*******************************************/
+            /*                File Input               */
+            /*******************************************/
             const std::filesystem::path maps{"maps"};
             int i = 0;
             float fPosOffset = 200.0f;
@@ -76,6 +91,7 @@ class TileMapEditor : public olc::PixelGameEngine
                 ss << dir_entry;
                 std::string str = ss.str();
                 str.erase(std::remove(str.begin(), str.end(), '"'), str.end());
+                str.erase(0, 5);
                 vFileButtons.push_back(Button(olc::vf2d((ScreenWidth() / 2) - 80.0f, (ScreenHeight() / 2) - fPosOffset),
                                               olc::vf2d(160.0f, 16.0f), str));
                 fPosOffset -= 20.0f;
@@ -101,6 +117,7 @@ class TileMapEditor : public olc::PixelGameEngine
             olc::vf2d p = { (ScreenWidth() / 2) - 84, ScreenHeight() - 64 };
 
             cSaveButton = Button(p, olc::vf2d(80.0f, 16.0f), "Save Map");
+            cSaveAsButton = Button(olc::vf2d(p.x - 108.0f, p.y), olc::vf2d(100.0f, 16.0f), "Save Map As");
             p.x += 88.0f;
             cResetButton = Button(p, olc::vf2d(80.0f, 16.0f), "Reset Map");
             p = olc::vf2d(10.0f, 15.0f);
@@ -130,6 +147,7 @@ class TileMapEditor : public olc::PixelGameEngine
                 case(EDIT):
                     HandleEditInput();
                     RenderEdit();
+                    cSaveAsButton.Update();
                     cSaveButton.Update();
                     cResetButton.Update();
                     cIncreaseSizeButton.Update();
@@ -155,6 +173,11 @@ class TileMapEditor : public olc::PixelGameEngine
                     }
                     break;
 
+                case(SAVE_AS):
+                    HandleSaveAsInput();
+                    RenderSaveAsInput();
+                    break;
+
                 default:
                     break;
             }
@@ -168,6 +191,16 @@ class TileMapEditor : public olc::PixelGameEngine
         {
             Clear(olc::VERY_DARK_BLUE);
             cOpenButton.DrawSelf(this);
+        }
+
+
+        void RenderSaveAsInput()
+        {
+            Clear(olc::VERY_DARK_BLUE);
+            olc::vf2d p = cSaveCustomButton.GetPos();
+            p.y -= 40.0f;
+            DrawStringDecal(p, sCustomFilename);
+            cSaveCustomButton.DrawSelf(this);
         }
 
 
@@ -190,6 +223,7 @@ class TileMapEditor : public olc::PixelGameEngine
             cIncreaseSizeButton.DrawSelf(this);
             cDecreaseSizeButton.DrawSelf(this);
             cWorld.DrawMap(&tv, vCursorCoords, iCursorSize);
+            cSaveAsButton.DrawSelf(this);
             cSaveButton.DrawSelf(this);
             cResetButton.DrawSelf(this);
             for (int i = 0; i < vTileTypes.size(); i++)
@@ -214,6 +248,28 @@ class TileMapEditor : public olc::PixelGameEngine
         }
 
 
+        void HandleSaveAsInput()
+        {
+            for (int i = 0; i < olc::ENUM_END; i++)
+            {
+                if (GetKey((olc::Key)i).bPressed)
+                    sCustomFilename += i + 64;
+            }
+
+            olc::vf2d vCursorScreenCoords = GetMousePos();
+            if (cSaveCustomButton.ButtonHover(vCursorScreenCoords))
+            {
+                bOnUI = true;
+                if (GetMouse(0).bPressed)
+                {
+                    cSaveCustomButton.Pressed();
+                    iCurAppState = EDIT;
+                    cWorld.SaveMapAs(sCustomFilename);
+                }
+            }
+        }
+
+
         void HandleFileSelectInput()
         {
             olc::vf2d vCursorScreenCoords = GetMousePos();
@@ -225,7 +281,7 @@ class TileMapEditor : public olc::PixelGameEngine
                     if (GetMouse(0).bPressed)
                     {
                         vFileButtons[i].Pressed();
-                        cWorld.LoadMapFromFile(vFileButtons[i].sText);
+                        cWorld.LoadMapFromFile("maps/" + vFileButtons[i].sText);
                         std::cout << vFileButtons[i].sText << std::endl;
                         iCurAppState = EDIT;
                     }
@@ -255,6 +311,16 @@ class TileMapEditor : public olc::PixelGameEngine
                         vTileTypes[i].Pressed();
                         iCurColorIndex = TileType(i);
                     }
+                }
+            }
+
+            if (cSaveAsButton.ButtonHover(vCursorScreenCoords))
+            {
+                bOnUI = true;
+                if (GetMouse(0).bPressed)
+                {
+                    cSaveAsButton.Pressed();
+                    iCurAppState = SAVE_AS;
                 }
             }
 

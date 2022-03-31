@@ -265,6 +265,12 @@ void World::SaveMapToFile()
 }
 
 
+void World::SaveMapAs(std::string sFilename)
+{
+    std::cout << "Save map as" << std::endl;
+}
+
+
 void World::LoadMapFromFile(std::string filename)
 {
     std::ifstream fin;
